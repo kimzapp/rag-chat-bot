@@ -1,0 +1,67 @@
+# Large Language Model Configuration
+llm:
+  # Primary model configuration
+  primary:
+    provider: "openai"  # openai, anthropic, azure_openai, huggingface, ollama
+    model: "gpt-4-turbo-preview"
+    temperature: 0.1
+    max_tokens: 2048
+    timeout: 30
+    
+  # Fallback models for reliability
+  fallback:
+    - provider: "openai"
+      model: "gpt-3.5-turbo"
+      temperature: 0.1
+      max_tokens: 2048
+      
+    - provider: "ollama"
+      model: "llama2"
+      base_url: "http://localhost:11434"
+
+# OpenAI Configuration
+openai:
+  api_key: "${OPENAI_API_KEY}"
+  organization: "${OPENAI_ORG_ID}"
+  base_url: "https://api.openai.com/v1"
+
+# Azure OpenAI Configuration
+azure_openai:
+  api_key: "${AZURE_OPENAI_API_KEY}"
+  endpoint: "${AZURE_OPENAI_ENDPOINT}"
+  api_version: "2024-02-15-preview"
+  deployment_name: "${AZURE_OPENAI_DEPLOYMENT}"
+
+# Anthropic Configuration
+anthropic:
+  api_key: "${ANTHROPIC_API_KEY}"
+
+# Hugging Face Configuration
+huggingface:
+  api_key: "${HUGGINGFACE_API_KEY}"
+  model_id: "microsoft/DialoGPT-large"
+  
+# Ollama Configuration (Local models)
+ollama:
+  base_url: "http://localhost:11434"
+  
+# Embedding Model Configuration
+embedding:
+  provider: "openai"  # openai, huggingface, sentence_transformers
+  model: "text-embedding-3-small"
+  dimension: 1536
+  batch_size: 100
+  
+  # Alternative embedding models
+  alternatives:
+    openai_large: "text-embedding-3-large"
+    huggingface: "sentence-transformers/all-MiniLM-L6-v2"
+    local: "sentence-transformers/all-mpnet-base-v2"
+
+# Model performance settings
+performance:
+  concurrent_requests: 5
+  retry_attempts: 3
+  retry_delay: 1.0
+  enable_streaming: true
+  enable_function_calling: true

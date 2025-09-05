@@ -3,14 +3,12 @@ Vector store abstraction layer for the RAG chatbot system.
 Provides unified interface for different vector database providers.
 """
 
-import os
-import json
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Tuple, Union
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 import numpy as np
 
-from ..config import get_config
+from configs import get_config
 
 
 @dataclass
@@ -63,19 +61,19 @@ class BaseVectorStore(ABC):
         """Delete documents by IDs."""
         pass
     
-    @abstractmethod
-    def update_documents(
-        self,
-        ids: List[str],
-        documents: Optional[List[str]] = None,
-        embeddings: Optional[List[np.ndarray]] = None,
-        metadatas: Optional[List[Dict[str, Any]]] = None
-    ) -> bool:
-        """Update existing documents."""
-        pass
+    # @abstractmethod
+    # def update_documents(
+    #     self,
+    #     ids: List[str],
+    #     documents: Optional[List[str]] = None,
+    #     embeddings: Optional[List[np.ndarray]] = None,
+    #     metadatas: Optional[List[Dict[str, Any]]] = None
+    # ) -> bool:
+    #     """Update existing documents."""
+    #     pass
     
     @abstractmethod
-    def get_document_count(self) -> int:
+    def get_document_count(self) -> int | None:
         """Get total number of documents in the store."""
         pass
     
@@ -84,16 +82,92 @@ class BaseVectorStore(ABC):
         """Clear all documents from the store."""
         pass
     
-    @abstractmethod
-    def create_collection(self, collection_name: str) -> bool:
-        """Create a new collection."""
-        pass
+    # @abstractmethod
+    # def create_collection(self, collection_name: str) -> bool:
+    #     """Create a new collection."""
+    #     pass
     
-    @abstractmethod
-    def delete_collection(self, collection_name: str) -> bool:
-        """Delete a collection."""
-        pass
+    # @abstractmethod
+    # def delete_collection(self, collection_name: str) -> bool:
+    #     """Delete a collection."""
+    #     pass
 
+
+class ChromaVectorStore(BaseVectorStore):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _create_chroma_client(self):
+        import chromadb
+        chromadb_client = chromadb.PersistentClient(**self.config)
+        return chromadb_client
+
+    def add_documents(self, documents, embeddings, metadatas, ids):
+        try:
+            chromadb_client = self._create_chroma_client()
+            collection_name = self.config.get('collection_name', 'rag_documents')
+            collection = chromadb_client.get_or_create_collection(name=collection_name, embedding_function=None) # No embedding function, we provide embeddings directly
+            collection.add(
+                documents=documents,
+                embeddings=embeddings,
+                metadatas=metadatas,
+                ids=ids
+            )
+            return True
+        except Exception as e:
+            print(f"Error adding documents to ChromaDB: {e}")
+            return False
+
+    def search(self, query_embedding, top_k=10, filter_criteria=None):
+        try:
+            chromadb_client = self._create_chroma_client()
+            collection_name = self.config.get('collection_name', 'rag_documents')
+            collection = chromadb_client.get_or_create_collection(name=collection_name, embedding_function=None)
+            results = collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where=filter_criteria
+            )
+            search_results = []
+            for doc, meta, score, id_ in zip(results['documents'][0], results['metadatas'][0], results['distances'][0], results['ids'][0]):
+                search_results.append(SearchResult(content=doc, metadata=meta, score=score, chunk_id=id_))
+            return search_results
+        except Exception as e:
+            print(f"Error searching in ChromaDB: {e}")
+            return []
+        
+    def delete_documents(self, ids):
+        try:
+            chromadb_client = self._create_chroma_client()
+            collection_name = self.config.get('collection_name', 'rag_documents')
+            collection = chromadb_client.get_or_create_collection(name=collection_name, embedding_function=None)
+            collection.delete(ids=ids)
+            return True
+        except Exception as e:
+            print(f"Error deleting documents from ChromaDB: {e}")
+            return False
+        
+    def get_document_count(self):
+        try:
+            chromadb_client = self._create_chroma_client()
+            collection_name = self.config.get('collection_name', 'rag_documents')
+            collection = chromadb_client.get_or_create_collection(name=collection_name, embedding_function=None)
+            return collection.count()
+        except Exception as e:
+            print(f"Error getting document count from ChromaDB: {e}")
+            return None
+        
+    def clear_all(self):
+        try:
+            chromadb_client = self._create_chroma_client()
+            collection_name = self.config.get('collection_name', 'rag_documents')
+            collection = chromadb_client.get_or_create_collection(name=collection_name, embedding_function=None)
+            collection.delete()
+            return True
+        except Exception as e:
+            print(f"Error clearing all documents from ChromaDB: {e}")
+            return False
+        
 
 class VectorStoreFactory:
     """Factory for creating vector store instances."""
@@ -107,11 +181,10 @@ class VectorStoreFactory:
         vector_config = self.config.vector_db_config.get(provider, {})
         
         if provider == 'chroma':
-            # TODO: Implement QdrantVectorStore
-            raise Exception("ChromaDb support not yet implemented")
+            return ChromaVectorStore(**vector_config)
         elif provider == 'pinecone':
-            # TODO: Implement QdrantVectorStore
-            raise Exception("PipeCone support not yet implemented")
+            # TODO: Implement PineconeVectorStore
+            raise Exception("Pinecone support not yet implemented")
         elif provider == 'qdrant':
             # TODO: Implement QdrantVectorStore
             raise Exception("Qdrant support not yet implemented")
@@ -126,3 +199,4 @@ def get_vector_store() -> BaseVectorStore:
     """Get vector store instance."""
     factory = VectorStoreFactory()
     return factory.create_vector_store()
+

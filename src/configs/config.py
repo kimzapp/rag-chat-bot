@@ -8,9 +8,6 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -70,7 +67,7 @@ class ConfigManager:
         Args:
             config_dir: Path to configuration directory. Defaults to 'configs'
         """
-        self.config_dir = Path(config_dir or "configs")
+        self.config_dir = Path(config_dir or r"E:\rag-chat-bot\src\configs")
         self._configs = {}
         self._load_all_configs()
     
@@ -83,7 +80,7 @@ class ConfigManager:
                 content = self._replace_env_vars(content)
                 return yaml.safe_load(content)
         except Exception as e:
-            logger.error(f"Error loading config file {file_path}: {e}")
+            print(f"Error loading config file {file_path}: {e}")
             return {}
     
     def _replace_env_vars(self, content: str) -> str:
@@ -113,9 +110,9 @@ class ConfigManager:
             file_path = self.config_dir / filename
             if file_path.exists():
                 self._configs[config_name] = self._load_yaml_file(file_path)
-                logger.info(f"Loaded {config_name} configuration")
+                print(f"Loaded {config_name} configuration")
             else:
-                logger.warning(f"Configuration file not found: {file_path}")
+                print(f"Configuration file not found: {file_path}")
                 self._configs[config_name] = {}
     
     def get_database_config(self) -> DatabaseConfig:
@@ -192,7 +189,7 @@ class ConfigManager:
         """Reload all configuration files."""
         self._configs.clear()
         self._load_all_configs()
-        logger.info("Configuration reloaded")
+        print("Configuration reloaded")
 
 
 # Global configuration manager instance

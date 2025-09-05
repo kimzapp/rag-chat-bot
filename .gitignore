@@ -4,5 +4,4 @@ src/__pycache__/*
 src/test/__pycache__/*
 src/configs/__pycache__/*
 .env
-.env.template
 .vscode/*

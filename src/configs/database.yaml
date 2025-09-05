@@ -1,0 +1,47 @@
+# Vector Database Configuration
+vector_db:
+  # Primary vector store (can be 'chroma', 'pinecone', 'weaviate', 'qdrant')
+  provider: "chroma"
+  
+  chroma:
+    persist_directory: "E:\\rag-chatbot\\chroma_db"
+    collection_name: "rag_documents"
+    distance_metric: "cosine"
+    
+  # qdrant:
+  #   host: "localhost"
+  #   port: 6333
+  #   collection_name: "rag_documents"
+  #   vector_size: 1536
+    
+  # weaviate:
+  #   url: "http://localhost:8080"
+  #   class_name: "Document"
+
+# # Traditional database for metadata and chat history
+# metadata_db:
+#   provider: "sqlite"  # or "postgresql"
+  
+#   sqlite:
+#     path: "data/metadata.db"
+    
+#   postgresql:
+#     host: "${POSTGRES_HOST}"
+#     port: 5432
+#     database: "${POSTGRES_DB}"
+#     username: "${POSTGRES_USER}"
+#     password: "${POSTGRES_PASSWORD}"
+
+# # Caching configuration
+# cache:
+#   provider: "redis"  # or "memory"
+  
+#   redis:
+#     host: "localhost"
+#     port: 6379
+#     db: 0
+#     ttl: 3600  # 1 hour
+    
+#   memory:
+#     max_size: 1000
+#     ttl: 3600

@@ -15,7 +15,7 @@ class BaseEmbedder(ABC):
         self.config = kwargs
     
     @abstractmethod
-    def embed_documents(self, texts: List[str]) -> List[np.ndarray]:
+    def embed_documents(self, texts: List[str]) -> List[Dict[str, np.ndarray]]:
         """Embed a list of documents."""
         pass
     
@@ -33,10 +33,10 @@ class SentenceTransformerEmbedder(BaseEmbedder):
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_name)
 
-    def embed_documents(self, texts: List[str]) -> List[np.ndarray]:
+    def embed_documents(self, texts: List[str]) -> List[Dict[str, np.ndarray]]:
         """Embed a list of documents."""
         embeddings = self.model.encode(texts, convert_to_numpy=True)
-        return [emb for emb in embeddings]
+        return [{"text": text, "embedding": emb} for text, emb in zip(texts, embeddings)]
 
     def embed_query(self, text: str) -> np.ndarray:
         """Embed a single query."""

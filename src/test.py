@@ -15,5 +15,8 @@ def test_embedder():
     print(embedder.config)
     print(type(embedder))
 
+    print(embedder.embed_documents(["Hello world", "How are you?"]))
+    print(embedder.embed_query("Hello world"))
+
 if __name__ == "__main__":
     test_embedder()

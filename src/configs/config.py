@@ -22,11 +22,19 @@ class DatabaseConfig:
 
 
 @dataclass
-class ModelConfig:
+class LLMConfig:
     """Model configuration settings."""
     llm_config: Dict[str, Any]
     embedding_config: Dict[str, Any]
     performance_config: Dict[str, Any]
+
+
+@dataclass
+class EmbeddingConfig:
+    """Embedding configuration settings."""
+    provider: str
+    model_name: str
+    additional_params: Dict[str, Any] = None
 
 
 @dataclass
@@ -100,7 +108,8 @@ class ConfigManager:
         """Load all configuration files."""
         config_files = {
             'database': 'database.yaml',
-            'models': 'models.yaml',
+            'llms': 'llms.yaml',
+            'embedding': 'embedding.yaml',
             'retrieval': 'retrieval.yaml',
             'ingestion': 'ingestion.yaml',
             'app': 'app.yaml'
@@ -128,14 +137,24 @@ class ConfigManager:
             cache_config=config.get('cache', {})
         )
     
-    def get_model_config(self) -> ModelConfig:
-        """Get model configuration."""
-        config = self._configs.get('models', {})
+    def get_llm_config(self) -> LLMConfig:
+        """Get LLM configuration."""
+        config = self._configs.get('llms', {})
         
-        return ModelConfig(
+        return LLMConfig(
             llm_config=config.get('llm', {}),
             embedding_config=config.get('embedding', {}),
             performance_config=config.get('performance', {})
+        )
+
+    def get_embedding_config(self) -> EmbeddingConfig:
+        """Get embedding configuration."""
+        config = self._configs.get('embedding', {}).get('embedding', {})
+        
+        return EmbeddingConfig(
+            provider=config.get('provider', 'sentence-transformer'),
+            model_name=config.get('model_name', 'all-MiniLM-L6-v2'),
+            additional_params=config.get('additional_params', {})
         )
     
     def get_retrieval_config(self) -> RetrievalConfig:

@@ -45,18 +45,7 @@ huggingface:
 ollama:
   base_url: "http://localhost:11434"
   
-# Embedding Model Configuration
-embedding:
-  provider: "openai"  # openai, huggingface, sentence_transformers
-  model: "text-embedding-3-small"
-  dimension: 1536
-  batch_size: 100
-  
-  # Alternative embedding models
-  alternatives:
-    openai_large: "text-embedding-3-large"
-    huggingface: "sentence-transformers/all-MiniLM-L6-v2"
-    local: "sentence-transformers/all-mpnet-base-v2"
+
 
 # Model performance settings
 performance:

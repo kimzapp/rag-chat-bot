@@ -4,7 +4,7 @@ Provides unified interface for different vector database providers.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Type
 from dataclasses import dataclass
 import numpy as np
 
@@ -172,31 +172,29 @@ class ChromaVectorStore(BaseVectorStore):
 class VectorStoreFactory:
     """Factory for creating vector store instances."""
     
-    def __init__(self):
-        self.config = get_config().get_database_config()
+    _vector_stores: Dict[str, Type[BaseVectorStore]] = {
+        'chroma': ChromaVectorStore,
+        # 'pinecone': PineconeVectorStore,
+        # 'qdrant': QdrantVectorStore,
+        # 'weaviate': WeaviateVectorStore,
+    }
     
-    def create_vector_store(self) -> BaseVectorStore:
+    @classmethod
+    def create_vector_store(cls) -> BaseVectorStore:
         """Create vector store based on configuration."""
-        provider = self.config.vector_db_provider
-        vector_config = self.config.vector_db_config.get(provider, {})
+        config = get_config().get_database_config()  
+        provider = config.vector_db_provider
+        vector_config = config.vector_db_config.get(provider, {})
         
-        if provider == 'chroma':
-            return ChromaVectorStore(**vector_config)
-        elif provider == 'pinecone':
-            # TODO: Implement PineconeVectorStore
-            raise Exception("Pinecone support not yet implemented")
-        elif provider == 'qdrant':
-            # TODO: Implement QdrantVectorStore
-            raise Exception("Qdrant support not yet implemented")
-        elif provider == 'weaviate':
-            # TODO: Implement WeaviateVectorStore
-            raise Exception("Weaviate support not yet implemented")
-        else:
-            raise Exception(f"Unsupported vector store provider: {provider}")
+        if provider not in cls._vector_stores:
+            raise ValueError(f"Unsupported vector store provider: {provider}")
+        
+        vector_store_class = cls._vector_stores[provider]
+        return vector_store_class(**vector_config)
+    
+    # @classmethod
+    # def register_vector_store(cls, name: str, vector_store_class: Type[BaseVectorStore]):
+    #     """Register a new vector store type."""
+    #     cls._vector_stores[name] = vector_store_class
 
-
-def get_vector_store() -> BaseVectorStore:
-    """Get vector store instance."""
-    factory = VectorStoreFactory()
-    return factory.create_vector_store()
 

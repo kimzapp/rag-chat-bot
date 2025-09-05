@@ -1,0 +1,12 @@
+# Embedding Model Configuration
+embedding:
+  provider: "sentence-transformer"  # openai, huggingface, sentence_transformers
+  model_name: "all-MiniLM-L6-v2"
+  dimension: 1536
+  batch_size: 100
+  
+  # Alternative embedding models
+  alternatives:
+    openai_large: "text-embedding-3-large"
+    huggingface: "sentence-transformers/all-MiniLM-L6-v2"
+    local: "sentence-transformers/all-mpnet-base-v2"

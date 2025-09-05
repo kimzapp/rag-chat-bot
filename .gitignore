@@ -6,3 +6,4 @@ src/configs/__pycache__/*
 .env
 .vscode/*
 src/embedding/__pycache__/*
+src/chatbot/__pycache__/*

@@ -24,9 +24,23 @@ class DatabaseConfig:
 @dataclass
 class LLMConfig:
     """Model configuration settings."""
-    llm_config: Dict[str, Any]
-    embedding_config: Dict[str, Any]
-    performance_config: Dict[str, Any]
+    provider: str
+    base_url: str
+    model_name: str
+    max_tokens: int = 1000
+    temperature: float = 0.7
+    timeout: int = 30
+    
+    @classmethod
+    def from_env(cls) -> 'LLMConfig':
+        return cls(
+            api_key=os.getenv('LLM_API_KEY', ''),
+            base_url=os.getenv('LLM_BASE_URL', 'https://api.openai.com/v1'),
+            model_name=os.getenv('LLM_MODEL_NAME', 'gpt-3.5-turbo'),
+            max_tokens=int(os.getenv('LLM_MAX_TOKENS', '1000')),
+            temperature=float(os.getenv('LLM_TEMPERATURE', '0.7')),
+            timeout=int(os.getenv('LLM_TIMEOUT', '30'))
+        )
 
 
 @dataclass
@@ -139,12 +153,15 @@ class ConfigManager:
     
     def get_llm_config(self) -> LLMConfig:
         """Get LLM configuration."""
-        config = self._configs.get('llms', {})
+        config = self._configs.get('llms', {}).get('primary', {})
         
         return LLMConfig(
-            llm_config=config.get('llm', {}),
-            embedding_config=config.get('embedding', {}),
-            performance_config=config.get('performance', {})
+            provider=config.get('provider', None),
+            base_url=config.get('base_url', None),
+            model_name=config.get('model_name', None),
+            max_tokens=config.get('max_tokens', 1000),
+            temperature=config.get('temperature', 0.7),
+            timeout=config.get('timeout', 30)
         )
 
     def get_embedding_config(self) -> EmbeddingConfig:

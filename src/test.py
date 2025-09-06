@@ -79,6 +79,21 @@ def test_llm_service():
 
     asyncio.run(run())
 
+def test_document_loader():
+    from ingestion.document_loaders import DocumentLoader
+
+    # Test with a sample text file
+    file_path = r"E:\rag-chat-bot\data\documents\example.txt"  # Ensure this file exists with some content
+    loader = DocumentLoader(file_path)
+    loader.process_document()
+    chunks = loader.chunk_content(chunk_size=50)
+    
+    print(f"Loaded content from {file_path}:")
+    print(loader.content)
+    print("\nChunks:")
+    for i, chunk in enumerate(chunks):
+        print(f"Chunk {i+1}: {chunk}")
+
 
 if __name__ == "__main__":
-    test_llm_service()
+    test_document_loader()

@@ -52,5 +52,33 @@ def test_llm_client():
 
     asyncio.run(run())
 
+def test_llm_service():
+    from chatbot.llm_service import LLMService
+    import asyncio
+
+    async def run():
+        llm_service = LLMService()
+        
+        try:
+            print("Starting streaming response...")
+            
+            async for chunk in llm_service.generate_stream_response(
+                query="Viết một câu chuyện ngắn về Python",
+                context="Bạn là một storyteller tài năng.",
+                chat_history=[
+                    {"role": "user", "content": "Hi!"},
+                    {"role": "assistant", "content": "Hello! How can I help you?"}
+                ]
+            ):
+                print(chunk, end="", flush=True)
+            
+            print("\n\nStreaming completed!")
+            
+        finally:
+            await llm_service.close()
+
+    asyncio.run(run())
+
+
 if __name__ == "__main__":
-    test_llm_client()
+    test_llm_service()

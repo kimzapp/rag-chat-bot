@@ -1,6 +1,5 @@
 from typing import List, Dict
 from .llm_client import LLMClientFactory
-from configs import LLMConfig
 
 
 class LLMService:
@@ -35,7 +34,6 @@ class LLMService:
             messages = self._build_messages(query, context, chat_history)
             async for chunk in await self.client.chat_completion(messages, stream=True):
                 yield chunk
-                
         except Exception as e:
             print(f"Error generating stream response: {e}")
             raise

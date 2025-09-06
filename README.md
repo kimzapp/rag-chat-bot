@@ -13,12 +13,13 @@ rag-chat-bot/
 │   ├── documents/              # Your documents (PDF, TXT, DOCX)
 │   └── database/               # Vector database
 ├── src/                        # Advanced system components
-│   ├── configs/                # Configuration files
 │   ├── ingestion/              # Document processing pipeline
 │   ├── vectorstore/            # Vector database abstraction
 │   ├── retriever/              # Advanced retrieval
 │   ├── chatbot/                # Chat pipeline
 │   └── api/                    # FastAPI web service
-├── notebooks/                  # notebooks for experimenting with new embedding methods, llm models, etc.
+├── configs/                    # Configuration files
+├── notebooks/                  # Jupyter notebooks
+├── simple_*.py                 # Beginner-friendly files
 └── requirements*.txt           # Dependencies
 ```

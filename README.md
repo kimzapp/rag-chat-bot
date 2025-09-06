@@ -18,8 +18,6 @@ rag-chat-bot/
 │   ├── retriever/              # Advanced retrieval
 │   ├── chatbot/                # Chat pipeline
 │   └── api/                    # FastAPI web service
-├── configs/                    # Configuration files
 ├── notebooks/                  # Jupyter notebooks
-├── simple_*.py                 # Beginner-friendly files
 └── requirements*.txt           # Dependencies
 ```

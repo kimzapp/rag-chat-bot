@@ -1,11 +1,17 @@
 def test_vector_store():
     from vectorstore import VectorStoreFactory
+    from embedding.embedder import EmbedderFactory
 
     vector_store = VectorStoreFactory.create_vector_store()
     print(f"Using vector store: {type(vector_store).__name__}")
     print(vector_store.config)
     print(type(vector_store))
 
+    # query
+    query = "Can AI understand human language?"
+    embedder = EmbedderFactory.create_embedder()
+    query_embedding = embedder.embed_query((query)).embedding
+    print(vector_store.search(query_embedding, top_k=3))
 
 def test_embedder():
     from embedding.embedder import EmbedderFactory
@@ -18,7 +24,7 @@ def test_embedder():
     print(embedder.embed_documents(["Hello world", "How are you?"]))
     print(embedder.embed_query("Hello world"))
 
-def test_vector_store_and_embbder():
+def test_vector_store_and_embedder():
     from vectorstore import VectorStoreFactory
     from embedding.embedder import EmbedderFactory
 
@@ -94,6 +100,12 @@ def test_document_loader():
     for i, chunk in enumerate(chunks):
         print(f"Chunk {i+1}: {chunk}")
 
+def test_ingestion_pipeline():
+    from pipeline.pipeline import IngestionPipeline
+
+    ingestion_pipeline = IngestionPipeline()
+    ingestion_pipeline.run(None)
+
 
 if __name__ == "__main__":
-    test_document_loader()
+    test_vector_store()

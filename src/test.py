@@ -106,6 +106,39 @@ def test_ingestion_pipeline():
     ingestion_pipeline = IngestionPipeline()
     ingestion_pipeline.run(None)
 
+def test_retrieval_pipeline():
+    from pipeline.pipeline import RetrievalPipeline
+
+    retrieval_pipeline = RetrievalPipeline()
+    query = "Can machine understand human language?"
+    results = retrieval_pipeline.run(query)
+    print(f"Results for query '{query}':")
+    for result in results:
+        print(result)
+
+def test_generation_pipeline():
+    from pipeline.pipeline import GenerationPipeline
+
+    generation_pipeline = GenerationPipeline()
+    query = "Viết một câu chuyện ngắn về Python"
+    context = "Bạn là một storyteller tài năng."
+    import asyncio
+
+    async def run():
+        print("Starting streaming response...")
+        async for chunk in generation_pipeline.run(
+            query=query,
+            context=context,
+            chat_history=[
+                {"role": "user", "content": "Hi!"},
+                {"role": "assistant", "content": "Hello! How can I help you?"}
+            ],
+            stream=True
+        ):
+            print(chunk, end="", flush=True)
+        print("\n\nStreaming completed!")
+
+    asyncio.run(run())
 
 if __name__ == "__main__":
-    test_vector_store()
+    test_generation_pipeline()

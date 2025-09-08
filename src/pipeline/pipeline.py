@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from embedding.embedder import EmbedderFactory
 from vectorstore import VectorStoreFactory
 from chatbot.llm_service import LLMService
@@ -16,8 +17,9 @@ class BasePipeline:
         # Default postprocessing steps
         return data
 
+    @abstractmethod
     def run(self, data):
-        raise NotImplementedError("Subclasses should implement this method.")
+        pass
 
 
 class IngestionPipeline(BasePipeline):
@@ -53,23 +55,30 @@ class IngestionPipeline(BasePipeline):
 
 
 class RetrievalPipeline(BasePipeline):
-    def __init__(self, vectorstore):
+    def __init__(self):
         super().__init__()
-        self.vectorstore = vectorstore
+        self.embedder = EmbedderFactory.create_embedder()
+        self.vectorstore = VectorStoreFactory.create_vector_store()
 
     def run(self, query):
-        results = self.vectorstore.search(query)
+        embedded_query = self.embedder.embed_query(query).embedding
+        results = self.vectorstore.search(embedded_query)
         return results
 
-
-class RAGPipeline(BasePipeline):
-    def __init__(self, ingestion_pipeline, retrieval_pipeline, llm_service):
+class GenerationPipeline(BasePipeline):
+    def __init__(self):
         super().__init__()
-        self.ingestion_pipeline = ingestion_pipeline
-        self.retrieval_pipeline = retrieval_pipeline
-        self.llm_service = llm_service
+        self.llm_service = LLMService()
 
-    def run(self, query):
-        retrieved_docs = self.retrieval_pipeline.run(query)
-        response = self.llm_service.generate(retrieved_docs, query)
+    def run(self, query, context, chat_history=None, stream=True):
+        if stream:
+            response = self.llm_service.generate_stream_response(
+                query=query, context=context,
+                chat_history=chat_history
+            )
+        else:
+            response = self.llm_service.generate_response(
+                query=query, context=context,
+                chat_history=chat_history
+            )
         return response

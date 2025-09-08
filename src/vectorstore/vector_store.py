@@ -40,8 +40,8 @@ class BaseVectorStore(ABC):
         self,
         documents: List[str],
         embeddings: List[np.ndarray],
-        metadatas: List[Dict[str, Any]],
-        ids: List[str]
+        ids: List[str],
+        metadatas: List[Dict[str, Any]] = None
     ) -> bool:
         """Add documents with embeddings to the vector store."""
         pass
@@ -99,10 +99,10 @@ class ChromaVectorStore(BaseVectorStore):
 
     def _create_chroma_client(self):
         import chromadb
-        chromadb_client = chromadb.PersistentClient(**self.config)
+        chromadb_client = chromadb.PersistentClient(path=self.config.get('path', './chroma_db'))
         return chromadb_client
 
-    def add_documents(self, documents, embeddings, metadatas, ids):
+    def add_documents(self, documents, embeddings, ids, metadatas=None):
         try:
             chromadb_client = self._create_chroma_client()
             collection_name = self.config.get('collection_name', 'rag_documents')

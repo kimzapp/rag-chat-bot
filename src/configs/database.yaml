@@ -4,7 +4,7 @@ vector_db:
   provider: "chroma"
   
   chroma:
-    persist_directory: "E:\\rag-chatbot\\chroma_db"
+    path: "E:\\rag-chatbot\\chroma_db"
     collection_name: "rag_documents"
     distance_metric: "cosine"
     

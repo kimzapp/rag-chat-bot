@@ -3,10 +3,18 @@ Embedding abstraction layer for the RAG chatbot system.
 Provides unified interface for different embedding providers.
 """
 
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import List, Dict, Type
 import numpy as np
 from configs import get_config
+
+
+@dataclass
+class EmbeddingResult:
+    text: str
+    embedding: np.ndarray
+
 
 class BaseEmbedder(ABC):
     """Abstract base class for embedders."""
@@ -15,12 +23,12 @@ class BaseEmbedder(ABC):
         self.config = kwargs
     
     @abstractmethod
-    def embed_documents(self, texts: List[str]) -> List[Dict[str, np.ndarray]]:
+    def embed_documents(self, texts: List[str]) -> List[EmbeddingResult]:
         """Embed a list of documents."""
         pass
     
     @abstractmethod
-    def embed_query(self, text: str) -> np.ndarray:
+    def embed_query(self, text: str) -> EmbeddingResult:
         """Embed a single query."""
         pass
     
@@ -33,14 +41,15 @@ class SentenceTransformerEmbedder(BaseEmbedder):
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_name)
 
-    def embed_documents(self, texts: List[str]) -> List[Dict[str, np.ndarray]]:
+    def embed_documents(self, texts: List[str]) -> List[EmbeddingResult]:
         """Embed a list of documents."""
         embeddings = self.model.encode(texts, convert_to_numpy=True)
-        return [{"text": text, "embedding": emb} for text, emb in zip(texts, embeddings)]
+        return [EmbeddingResult(text=text, embedding=emb) for text, emb in zip(texts, embeddings)]
 
-    def embed_query(self, text: str) -> np.ndarray:
+    def embed_query(self, text: str) -> EmbeddingResult:
         """Embed a single query."""
-        return self.model.encode(text, convert_to_numpy=True)
+        embedding = self.model.encode(text, convert_to_numpy=True)
+        return EmbeddingResult(text=text, embedding=embedding)
 
 
 class EmbedderFactory:

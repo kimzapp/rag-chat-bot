@@ -141,4 +141,4 @@ def test_generation_pipeline():
     asyncio.run(run())
 
 if __name__ == "__main__":
-    test_generation_pipeline()
+    test_ingestion_pipeline()

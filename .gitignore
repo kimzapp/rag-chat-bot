@@ -10,3 +10,4 @@ src/chatbot/__pycache__/*
 src/ingestion/__pycache__/*
 src/pipeline/__pycache__/*
 chroma_db/*
+references/*

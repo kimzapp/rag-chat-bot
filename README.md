@@ -26,3 +26,7 @@ rag-chat-bot/
 ├── notebooks/                  # Jupyter notebooks
 └── requirements*.txt           # Dependencies
 ```
+
+## References
+
+[1] Gao, Y., Xiong, Y., Gao, X., Jia, K., Pan, J., Bi, Y., Dai, Y., Sun, J., Wang, M., & Wang, H. (2023). Retrieval-augmented generation for large language models: A survey [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2312.10997

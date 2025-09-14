@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, AsyncGenerator, Union
+from typing import Dict, Any, List, Generator, AsyncGenerator, Union
 from configs import LLMConfig
 import os
 from dotenv import load_dotenv
@@ -15,7 +15,16 @@ class LLMClient(ABC):
         self.config: LLMConfig = get_config().get_llm_config()
     
     @abstractmethod
-    async def chat_completion(
+    def chat_completion(
+        self, 
+        messages: List[Dict[str, str]], 
+        stream: bool = False
+    ) -> Union[Dict[str, Any], Generator[str, None, None]]:
+        """Gọi API để tạo chat completion"""
+        pass
+
+    @abstractmethod
+    async def async_chat_completion(
         self, 
         messages: List[Dict[str, str]], 
         stream: bool = False
@@ -24,7 +33,12 @@ class LLMClient(ABC):
         pass
     
     @abstractmethod
-    async def _stream_completion(self, payload: Dict[str, Any]) -> AsyncGenerator[str, None]:
+    def _stream_completion(self, payload: Dict[str, Any]) -> Generator[str, None, None]:
+        """Xử lý streaming response"""
+        pass
+
+    @abstractmethod
+    async def _async_stream_completion(self, payload: Dict[str, Any]) -> AsyncGenerator[str, None]:
         """Xử lý streaming response"""
         pass
     
@@ -32,6 +46,37 @@ class LLMClient(ABC):
     async def close(self):
         """Đóng client connection"""
         pass
+
+    def build_messages(
+        self, 
+        query: str, 
+        context: str = "", 
+        chat_history: List[Dict[str, str]] = None
+    ) -> List[Dict[str, str]]:
+        """Xây dựng messages cho API call"""
+        messages = []
+
+        # System message với context
+        system_content = "Bạn là một AI assistant hữu ích."
+        if context:
+            system_content += f"\n\nContext thông tin:\n{context}"
+        
+        messages.append({
+            "role": "system",
+            "content": system_content
+        })
+        
+        # Thêm chat history
+        if chat_history:
+            messages.extend(chat_history)
+        
+        # Thêm query hiện tại
+        messages.append({
+            "role": "user",
+            "content": query
+        })
+        
+        return messages
 
 
 class GeminiClient(LLMClient):
@@ -50,18 +95,43 @@ class GeminiClient(LLMClient):
             )
         )
 
-    async def chat_completion(
-        self, 
-        messages: List[Dict[str, str]], 
+    def chat_completion(
+        self,
+        query: str,
+        context: str = "",
+        chat_history: List[Dict[str, str]] = None,
         stream: bool = False
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], Generator[str, None, None]]:
         """Gọi API để tạo chat completion"""
         try:
+            messages = self.build_messages(query, context, chat_history)
             # Convert OpenAI format messages to Gemini format
             prompt = self._convert_messages_to_prompt(messages)
             
             if stream:
                 return self._stream_completion(prompt)
+            else:
+                response = self.client.generate_content(prompt)
+                return self._convert_to_openai_format(response)
+        except Exception as e:
+            print(f"Error in chat completion: {e}")
+            raise
+
+    async def async_chat_completion(
+        self, 
+        query: str,
+        context: str = "",
+        chat_history: List[Dict[str, str]] = None,
+        stream: bool = False
+    ) -> Dict[str, AsyncGenerator[str, None]]:
+        """Gọi API để tạo chat completion"""
+        try:
+            # Convert OpenAI format messages to Gemini format
+            messages = self.build_messages(query, context, chat_history)
+            prompt = self._convert_messages_to_prompt(messages)
+            
+            if stream:
+                return self._async_stream_completion(prompt)
             else:
                 response = await self.client.generate_content_async(prompt)
                 return self._convert_to_openai_format(response)
@@ -70,7 +140,23 @@ class GeminiClient(LLMClient):
             print(f"Error in chat completion: {e}")
             raise
     
-    async def _stream_completion(self, prompt: Dict[str, Any]) -> AsyncGenerator[str, None]:
+    def _stream_completion(self, prompt: Dict[str, Any]) -> Generator[str, None, None]:
+        """Xử lý streaming response cho Gemini"""
+        try:
+            response = self.client.generate_content(
+                prompt,
+                stream=True
+            )
+            
+            for chunk in response:
+                if chunk.text:
+                    yield chunk.text
+                    
+        except Exception as e:
+            print(f"Error in streaming: {e}")
+            raise
+
+    async def _async_stream_completion(self, prompt: Dict[str, Any]) -> AsyncGenerator[str, None]:
         """Xử lý streaming response cho Gemini"""
         try:
             response = await self.client.generate_content_async(
@@ -126,7 +212,7 @@ class GeminiClient(LLMClient):
                     "finish_reason": "error"
                 }]
             }
-    
+
     async def close(self):
         """Đóng client connection"""
         pass

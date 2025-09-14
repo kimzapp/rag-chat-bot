@@ -43,47 +43,15 @@ def test_llm_client():
     from chatbot.llm_client import LLMClientFactory
 
     llm_client = LLMClientFactory.create_llm_client()
-    print(f"Using LLM client: {type(llm_client).__name__}")
-    print(llm_client.config)
-    print(type(llm_client))
 
-    import asyncio
 
-    async def run():
-        response = await llm_client.chat_completion([
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello, how are you?"}
-        ])
-        print(response)
-
-    asyncio.run(run())
-
-def test_llm_service():
-    from chatbot.llm_service import LLMService
-    import asyncio
-
-    async def run():
-        llm_service = LLMService()
+    response = llm_client.chat_completion([
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Can machine understand human language?"}
+    ], stream=True)
         
-        try:
-            print("Starting streaming response...")
-            
-            async for chunk in llm_service.generate_stream_response(
-                query="Viết một câu chuyện ngắn về Python",
-                context="Bạn là một storyteller tài năng.",
-                chat_history=[
-                    {"role": "user", "content": "Hi!"},
-                    {"role": "assistant", "content": "Hello! How can I help you?"}
-                ]
-            ):
-                print(chunk, end="", flush=True)
-            
-            print("\n\nStreaming completed!")
-            
-        finally:
-            await llm_service.close()
-
-    asyncio.run(run())
+    for chunk in response:
+        print(chunk, end="", flush=True)
 
 def test_document_loader():
     from ingestion.document_loaders import DocumentLoader
@@ -141,4 +109,4 @@ def test_generation_pipeline():
     asyncio.run(run())
 
 if __name__ == "__main__":
-    test_ingestion_pipeline()
+    test_llm_client()

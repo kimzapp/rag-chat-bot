@@ -27,7 +27,7 @@ rag-chat-bot/
 └── requirements*.txt           # Dependencies
 ```
 
-### Using Open-source LLMs On Local Enviromment
+## Using Open-source LLMs On Local Enviromment
 
 At the beginning, we deploy LLM using Ollama framework.
 

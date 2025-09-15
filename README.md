@@ -21,7 +21,7 @@ rag-chat-bot/
 │   ├── ingestion/              # Document processing pipeline
 │   ├── vectorstore/            # Vector database abstraction
 │   ├── retriever/              # Advanced retrieval
-│   ├── chatbot/                # Chat pipeline
+│   ├── llms/                   # self-hosted llms
 │   └── api/                    # FastAPI web service
 ├── notebooks/                  # Jupyter notebooks
 └── requirements*.txt           # Dependencies

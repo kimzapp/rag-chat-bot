@@ -6,7 +6,7 @@ src/configs/__pycache__/*
 .env
 .vscode/*
 src/embedding/__pycache__/*
-src/chatbot/__pycache__/*
+src/llms/__pycache__/*
 src/ingestion/__pycache__/*
 src/pipeline/__pycache__/*
 chroma_db/*

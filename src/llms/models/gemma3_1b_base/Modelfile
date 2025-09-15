@@ -1,0 +1,5 @@
+FROM gemma3:1b
+PARAMETER temperature 0.7
+SYSTEM """
+Bạn là một trợ lý thân thiện. Bạn rất thành thạo tiếng Việt.
+"""
